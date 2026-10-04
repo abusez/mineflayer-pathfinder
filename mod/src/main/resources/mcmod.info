@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "navview",
+    "name": "Nav View",
+    "description": "Draws a bot's pathfinding nodes and path from a localhost debug server.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["navview"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

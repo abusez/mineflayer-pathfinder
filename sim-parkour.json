@@ -1,0 +1,885 @@
+{
+  "options": {
+    "runs": 500,
+    "seed": 11,
+    "kinds": "parkour",
+    "variants": "all",
+    "workers": 23,
+    "replay": null,
+    "trace": false,
+    "out": "sim-parkour.json",
+    "maxTicks": 3000
+  },
+  "seconds": 9.477,
+  "summary": [
+    {
+      "group": "parkour",
+      "runs": 500,
+      "success": 0.998,
+      "solvable": 0.998,
+      "noPath": 0,
+      "timeout": 0,
+      "otherFail": 1,
+      "ticksVsBound": 1.306998295550728,
+      "replans": 0.146,
+      "fallbackTicks": 0.018,
+      "falls": 19,
+      "fallDamage": 19,
+      "predictionMisses": 0,
+      "maxYawDelta": 22.350000381469727,
+      "msPerTick": 2.3435963606472305,
+      "invariants": {
+        "snaps": 0,
+        "accelViolations": 2,
+        "offGrid": 0,
+        "constantTurnRuns": 0,
+        "keyFlicker": 101,
+        "sprintIntoWall": 0,
+        "teleports": 0
+      }
+    },
+    {
+      "group": "parkour/base",
+      "runs": 100,
+      "success": 1,
+      "solvable": 1,
+      "noPath": 0,
+      "timeout": 0,
+      "otherFail": 0,
+      "ticksVsBound": 1.193106988223098,
+      "replans": 0.11,
+      "fallbackTicks": 0,
+      "falls": 6,
+      "fallDamage": 6,
+      "predictionMisses": 0,
+      "maxYawDelta": 18.00000762939453,
+      "msPerTick": 2.441953885947714,
+      "invariants": {
+        "snaps": 0,
+        "accelViolations": 0,
+        "offGrid": 0,
+        "constantTurnRuns": 0,
+        "keyFlicker": 15,
+        "sprintIntoWall": 0,
+        "teleports": 0
+      }
+    },
+    {
+      "group": "parkour/jump1",
+      "runs": 100,
+      "success": 1,
+      "solvable": 1,
+      "noPath": 0,
+      "timeout": 0,
+      "otherFail": 0,
+      "ticksVsBound": 1.2345607621396066,
+      "replans": 0.17,
+      "fallbackTicks": 0,
+      "falls": 0,
+      "fallDamage": 0,
+      "predictionMisses": 0,
+      "maxYawDelta": 18.14999771118164,
+      "msPerTick": 2.1925281141630864,
+      "invariants": {
+        "snaps": 0,
+        "accelViolations": 1,
+        "offGrid": 0,
+        "constantTurnRuns": 0,
+        "keyFlicker": 21,
+        "sprintIntoWall": 0,
+        "teleports": 0
+      }
+    },
+    {
+      "group": "parkour/jump2",
+      "runs": 100,
+      "success": 1,
+      "solvable": 1,
+      "noPath": 0,
+      "timeout": 0,
+      "otherFail": 0,
+      "ticksVsBound": 1.3089003877679448,
+      "replans": 0.19,
+      "fallbackTicks": 0,
+      "falls": 0,
+      "fallDamage": 0,
+      "predictionMisses": 0,
+      "maxYawDelta": 22.350000381469727,
+      "msPerTick": 2.305054034168191,
+      "invariants": {
+        "snaps": 0,
+        "accelViolations": 1,
+        "offGrid": 0,
+        "constantTurnRuns": 0,
+        "keyFlicker": 22,
+        "sprintIntoWall": 0,
+        "teleports": 0
+      }
+    },
+    {
+      "group": "parkour/speed1",
+      "runs": 100,
+      "success": 0.99,
+      "solvable": 0.99,
+      "noPath": 0,
+      "timeout": 0,
+      "otherFail": 1,
+      "ticksVsBound": 1.3395324448211796,
+      "replans": 0.12,
+      "fallbackTicks": 0.09,
+      "falls": 7,
+      "fallDamage": 7,
+      "predictionMisses": 0,
+      "maxYawDelta": 18.300003051757812,
+      "msPerTick": 2.3998457810486244,
+      "invariants": {
+        "snaps": 0,
+        "accelViolations": 0,
+        "offGrid": 0,
+        "constantTurnRuns": 0,
+        "keyFlicker": 25,
+        "sprintIntoWall": 0,
+        "teleports": 0
+      }
+    },
+    {
+      "group": "parkour/speed2",
+      "runs": 100,
+      "success": 1,
+      "solvable": 1,
+      "noPath": 0,
+      "timeout": 0,
+      "otherFail": 0,
+      "ticksVsBound": 1.459216236294512,
+      "replans": 0.14,
+      "fallbackTicks": 0,
+      "falls": 6,
+      "fallDamage": 6,
+      "predictionMisses": 0,
+      "maxYawDelta": 19.50000762939453,
+      "msPerTick": 2.3785999879085487,
+      "invariants": {
+        "snaps": 0,
+        "accelViolations": 0,
+        "offGrid": 0,
+        "constantTurnRuns": 0,
+        "keyFlicker": 18,
+        "sprintIntoWall": 0,
+        "teleports": 0
+      }
+    },
+    {
+      "group": "ALL",
+      "runs": 500,
+      "success": 0.998,
+      "solvable": 0.998,
+      "noPath": 0,
+      "timeout": 0,
+      "otherFail": 1,
+      "ticksVsBound": 1.306998295550728,
+      "replans": 0.146,
+      "fallbackTicks": 0.018,
+      "falls": 19,
+      "fallDamage": 19,
+      "predictionMisses": 0,
+      "maxYawDelta": 22.350000381469727,
+      "msPerTick": 2.3435963606472305,
+      "invariants": {
+        "snaps": 0,
+        "accelViolations": 2,
+        "offGrid": 0,
+        "constantTurnRuns": 0,
+        "keyFlicker": 101,
+        "sprintIntoWall": 0,
+        "teleports": 0
+      }
+    }
+  ],
+  "failures": [
+    {
+      "replay": "parkour:1100000:base",
+      "status": "arrived",
+      "ticks": 188,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 4
+      }
+    },
+    {
+      "replay": "parkour:1100003:jump1",
+      "status": "arrived",
+      "ticks": 195,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100013:jump1",
+      "status": "arrived",
+      "ticks": 154,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100014:jump2",
+      "status": "arrived",
+      "ticks": 126,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100027:speed2",
+      "status": "arrived",
+      "ticks": 139,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100028:jump1",
+      "status": "arrived",
+      "ticks": 91,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100031:speed1",
+      "status": "arrived",
+      "ticks": 132,
+      "replans": {
+        "better": 1
+      },
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100032:speed2",
+      "status": "arrived",
+      "ticks": 116,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 3
+      }
+    },
+    {
+      "replay": "parkour:1100040:base",
+      "status": "arrived",
+      "ticks": 181,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100046:speed1",
+      "status": "arrived",
+      "ticks": 165,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100051:speed1",
+      "status": "arrived",
+      "ticks": 149,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100063:jump1",
+      "status": "arrived",
+      "ticks": 174,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100079:jump2",
+      "status": "arrived",
+      "ticks": 113,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100099:jump2",
+      "status": "arrived",
+      "ticks": 143,
+      "replans": {},
+      "invariants": {
+        "accelViolations": 1
+      }
+    },
+    {
+      "replay": "parkour:1100108:jump1",
+      "status": "arrived",
+      "ticks": 143,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100109:jump2",
+      "status": "arrived",
+      "ticks": 138,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100111:speed1",
+      "status": "arrived",
+      "ticks": 129,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100137:speed2",
+      "status": "arrived",
+      "ticks": 109,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100141:speed1",
+      "status": "failed",
+      "reason": "NoPath",
+      "ticks": 122,
+      "replans": {
+        "fallback": 1
+      },
+      "invariants": {
+        "keyFlicker": 6
+      }
+    },
+    {
+      "replay": "parkour:1100143:jump1",
+      "status": "arrived",
+      "ticks": 141,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100151:speed1",
+      "status": "arrived",
+      "ticks": 161,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100155:base",
+      "status": "arrived",
+      "ticks": 132,
+      "replans": {
+        "better": 1
+      },
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100159:jump2",
+      "status": "arrived",
+      "ticks": 185,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100173:jump1",
+      "status": "arrived",
+      "ticks": 135,
+      "replans": {
+        "better": 1
+      },
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100184:jump2",
+      "status": "arrived",
+      "ticks": 146,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100193:jump1",
+      "status": "arrived",
+      "ticks": 164,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 3
+      }
+    },
+    {
+      "replay": "parkour:1100196:speed1",
+      "status": "arrived",
+      "ticks": 95,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100198:jump1",
+      "status": "arrived",
+      "ticks": 100,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100207:speed2",
+      "status": "arrived",
+      "ticks": 133,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100213:jump1",
+      "status": "arrived",
+      "ticks": 171,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100219:jump2",
+      "status": "arrived",
+      "ticks": 143,
+      "replans": {
+        "better": 1
+      },
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100240:base",
+      "status": "arrived",
+      "ticks": 126,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100241:speed1",
+      "status": "arrived",
+      "ticks": 196,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100259:jump2",
+      "status": "arrived",
+      "ticks": 136,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100265:base",
+      "status": "arrived",
+      "ticks": 144,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100267:speed2",
+      "status": "arrived",
+      "ticks": 135,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100284:jump2",
+      "status": "arrived",
+      "ticks": 167,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 3
+      }
+    },
+    {
+      "replay": "parkour:1100286:speed1",
+      "status": "arrived",
+      "ticks": 149,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100293:jump1",
+      "status": "arrived",
+      "ticks": 129,
+      "replans": {
+        "better": 1
+      },
+      "invariants": {
+        "keyFlicker": 3
+      }
+    },
+    {
+      "replay": "parkour:1100298:jump1",
+      "status": "arrived",
+      "ticks": 150,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100308:jump1",
+      "status": "arrived",
+      "ticks": 114,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100316:speed1",
+      "status": "arrived",
+      "ticks": 116,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100325:base",
+      "status": "arrived",
+      "ticks": 151,
+      "replans": {
+        "better": 1
+      },
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100327:speed2",
+      "status": "arrived",
+      "ticks": 142,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100330:base",
+      "status": "arrived",
+      "ticks": 123,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100334:jump2",
+      "status": "arrived",
+      "ticks": 173,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 3
+      }
+    },
+    {
+      "replay": "parkour:1100342:speed2",
+      "status": "arrived",
+      "ticks": 172,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100343:jump1",
+      "status": "arrived",
+      "ticks": 174,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100349:jump2",
+      "status": "arrived",
+      "ticks": 126,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100371:speed1",
+      "status": "arrived",
+      "ticks": 160,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100374:jump2",
+      "status": "arrived",
+      "ticks": 140,
+      "replans": {
+        "better": 1
+      },
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100377:speed2",
+      "status": "arrived",
+      "ticks": 166,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100380:base",
+      "status": "arrived",
+      "ticks": 139,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100385:base",
+      "status": "arrived",
+      "ticks": 112,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100387:speed2",
+      "status": "arrived",
+      "ticks": 116,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100388:jump1",
+      "status": "arrived",
+      "ticks": 153,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100395:base",
+      "status": "arrived",
+      "ticks": 177,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100401:speed1",
+      "status": "arrived",
+      "ticks": 141,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 2
+      }
+    },
+    {
+      "replay": "parkour:1100404:jump2",
+      "status": "arrived",
+      "ticks": 172,
+      "replans": {
+        "better": 1
+      },
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100414:jump2",
+      "status": "arrived",
+      "ticks": 106,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100426:speed1",
+      "status": "arrived",
+      "ticks": 146,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100428:jump1",
+      "status": "arrived",
+      "ticks": 174,
+      "replans": {},
+      "invariants": {
+        "accelViolations": 1
+      }
+    },
+    {
+      "replay": "parkour:1100432:speed2",
+      "status": "arrived",
+      "ticks": 131,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 3
+      }
+    },
+    {
+      "replay": "parkour:1100437:speed2",
+      "status": "arrived",
+      "ticks": 142,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100444:jump2",
+      "status": "arrived",
+      "ticks": 137,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100454:jump2",
+      "status": "arrived",
+      "ticks": 147,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100471:speed1",
+      "status": "arrived",
+      "ticks": 107,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100476:speed1",
+      "status": "arrived",
+      "ticks": 116,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100482:speed2",
+      "status": "arrived",
+      "ticks": 71,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100484:jump2",
+      "status": "arrived",
+      "ticks": 183,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100487:speed2",
+      "status": "arrived",
+      "ticks": 97,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100489:jump2",
+      "status": "arrived",
+      "ticks": 194,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100494:jump2",
+      "status": "arrived",
+      "ticks": 175,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    },
+    {
+      "replay": "parkour:1100498:jump1",
+      "status": "arrived",
+      "ticks": 150,
+      "replans": {},
+      "invariants": {
+        "keyFlicker": 1
+      }
+    }
+  ]
+}

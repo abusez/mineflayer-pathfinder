@@ -1,0 +1,9 @@
+node_modules
+.env
+recordings/
+sim-report.json
+mod/build/
+mod/.gradle/
+mod/run/
+mod/out/
+.toolchain/
