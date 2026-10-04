@@ -5,7 +5,7 @@ require('./lib/ensurePhysics')
 
 // Physics-driven parkour navigation for mineflayer on Minecraft 1.8.9.
 //
-//   const { createBot } = require('mineflayer-pathfinder')
+//   const { createBot } = require('mineflayer-nav')
 //   const bot = await createBot({ host: 'localhost', username: 'Bot' })
 //   bot.once('nav:ready', async () => {
 //     await bot.nav.goto(100, 64, -20)

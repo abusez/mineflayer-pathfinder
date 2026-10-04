@@ -1,0 +1,53 @@
+# Builds the navview Forge 1.8.9 client mod. On a version tag (v*), attaches
+# the jar to a GitHub Release for that tag. Can also be run by hand from the
+# Actions tab, which just uploads the jar as a build artifact.
+name: navview mod
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ForgeGradle 2.1 (Minecraft 1.8.9) needs Java 8 and an old Gradle.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Install Gradle 4.10.3
+        run: |
+          curl -sSL -o gradle.zip https://services.gradle.org/distributions/gradle-4.10.3-bin.zip
+          unzip -q gradle.zip -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/gradle-4.10.3/bin" >> "$GITHUB_PATH"
+
+      - name: Build
+        working-directory: mod
+        run: gradle build --console=plain
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: navview-jar
+          path: mod/build/libs/navview-*.jar
+
+      # The jar name follows `version` in mod/build.gradle.
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            mod/build/libs/navview-1.0.0.jar
+          body: |
+            navview client mod for Forge 1.8.9: draws the bot's planned route in game.
+            Put `navview-1.0.0.jar` in `.minecraft/mods`, then run the bot with its
+            debug server on (the CLI does this by default on port 28765).
+
+            Library: `npm install github:abusez/mineflayer-pathfinder#${{ github.ref_name }}`

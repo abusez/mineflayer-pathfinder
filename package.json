@@ -1,7 +1,8 @@
 {
-  "name": "mineflayer-pathfinder",
+  "name": "mineflayer-nav",
   "version": "0.1.0",
   "description": "Physics-driven parkour pathfinding for mineflayer on Minecraft 1.8.9: exact 1.8.9 hitboxes, momentum-aware jumps, vanilla client physics and humanlike rotation.",
+  "license": "MIT",
   "main": "index.js",
   "bin": {
     "mineflayer-nav": "bin/cli.js"
@@ -16,7 +17,8 @@
     "log.js",
     "scripts/patch-physics.js",
     ".env.example",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",

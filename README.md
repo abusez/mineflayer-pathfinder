@@ -1,4 +1,4 @@
-# mineflayer-pathfinder
+# mineflayer-nav
 
 Physics-driven parkour pathfinding for [mineflayer](https://github.com/binmasterdotpro/mineflayer) on Minecraft 1.8.9.
 
@@ -17,12 +17,14 @@ Requires Node.js 22 or newer.
 npm install github:abusez/mineflayer-pathfinder
 ```
 
-The package installs its own mineflayer and protocol forks (binmasterdotpro, 1.8.9). Keep install scripts enabled: the `minecraft-data` fork builds its data files at install time. This package's own install step patches `prismarine-physics` with the 1.8.9 fixes, and it re-applies that patch when first required if install scripts were skipped. If your npm asks you to approve install scripts, approve `minecraft-data` and `mineflayer-pathfinder`.
+The repository is `mineflayer-pathfinder`, but the package is named `mineflayer-nav`, so it doesn't clash with the unrelated `mineflayer-pathfinder` on npm. Require it as `mineflayer-nav`.
+
+The package installs its own mineflayer and protocol forks (binmasterdotpro, 1.8.9). Keep install scripts enabled: the `minecraft-data` fork builds its data files at install time. This package's own install step patches `prismarine-physics` with the 1.8.9 fixes, and it re-applies that patch when first required if install scripts were skipped. If your npm asks you to approve install scripts, approve `minecraft-data` and `mineflayer-nav`.
 
 ## Quick start
 
 ```js
-const { createBot } = require('mineflayer-pathfinder')
+const { createBot } = require('mineflayer-nav')
 
 async function main () {
   const bot = await createBot({
@@ -61,7 +63,7 @@ It returns the mineflayer bot, with the vanilla 1.8.9 physics plugin installed i
 
 ```js
 const mineflayer = require('mineflayer')
-const { vanillaPhysics, navPlugin } = require('mineflayer-pathfinder')
+const { vanillaPhysics, navPlugin } = require('mineflayer-nav')
 
 const bot = mineflayer.createBot({
   host: 'localhost',
@@ -149,7 +151,7 @@ What each command does:
 
 ## navview client mod
 
-`mod/` is a Forge 1.8.9 client mod. It connects to the bot's debug server on `127.0.0.1:28765` and draws the planned route in your game. Build it with Gradle from `mod/`. It isn't part of the npm package.
+`mod/` is a Forge 1.8.9 client mod. It connects to the bot's debug server on `127.0.0.1:28765` and draws the planned route in your game. Download the jar from the [latest release](https://github.com/abusez/mineflayer-pathfinder/releases/latest). Usage and build instructions are in [mod/README.md](mod/README.md). It isn't part of the npm package.
 
 ## How it works
 
@@ -185,3 +187,7 @@ npm run simulate -- --replay parkour:100154:jump2 --trace
 - `node scripts/bench.js` profiles the planner and controller.
 
 The old pathfinder code is kept for reference in `legacy/`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
