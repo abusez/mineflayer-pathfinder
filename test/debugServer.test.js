@@ -32,12 +32,4 @@ test('snapshot is the followed route, in order', () => {
   assert.strictEqual(snap.nodes[1].kind, 'gap')
   assert.strictEqual(snap.nodes[1].anchor, true)
   assert.strictEqual(snap.bot.x, 1.2)
-  assert.strictEqual(snap.sim, null)
-
-  bot.nav.simPose = { at: Date.now(), x: 3.5, y: 64, z: 4.25, yaw: 90, pitch: -10, sneak: true, sprint: false, vx: 0.1, vz: -0.2 }
-  const live = buildSnapshot(bot)
-  assert.deepStrictEqual(live.sim, { x: 3.5, y: 64, z: 4.25, yaw: 90, pitch: -10, sneak: true, sprint: false, vx: 0.1, vz: -0.2 })
-
-  bot.nav.simPose.at = Date.now() - 5000
-  assert.strictEqual(buildSnapshot(bot).sim, null)
 })

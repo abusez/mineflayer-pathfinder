@@ -2,263 +2,222 @@ package navview;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
 import java.util.List;
 
-// Same draw as BedwarsBot's path renderer: a translucent floor box on each
-// remaining node, a smooth outline, and a line through the node centres.
+// World overlay. Nodes sit on the floor; the path joins them, arcing over jumps.
 final class PathRenderer {
-    private static final float RED = 170F / 255F;
-    private static final float GREEN = 85F / 255F;
-    private static final float BLUE = 255F / 255F;
-    private static final float FILL = 0.22F;
-    private static final float LINE_WIDTH = 1.5F;
-    private static final double PAD = 0.002;
-    private static final double LINE_LIFT = 0.03;
-    private static final double FADE_NEAR = 6;
-    private static final double FADE_FAR = 36;
+    private static final float LIFT = 0.05F;
 
     @SubscribeEvent
     public void onRender (RenderWorldLastEvent event) {
         if (!NavView.enabled) return;
         PathSnapshot snap = PathClient.current();
         if (snap == null) return;
-        if (snap.nodes.isEmpty() && snap.goal == null) return;
+        if (snap.nodes.isEmpty() && snap.goal == null && !(snap.bot != null && snap.active)) return;
 
         Minecraft mc = Minecraft.getMinecraft();
         Entity view = mc.getRenderViewEntity();
         if (view == null) return;
         float partial = event.partialTicks;
-        double ox = view.lastTickPosX + (view.posX - view.lastTickPosX) * partial;
-        double oy = view.lastTickPosY + (view.posY - view.lastTickPosY) * partial;
-        double oz = view.lastTickPosZ + (view.posZ - view.lastTickPosZ) * partial;
+        double cx = view.lastTickPosX + (view.posX - view.lastTickPosX) * partial;
+        double cy = view.lastTickPosY + (view.posY - view.lastTickPosY) * partial;
+        double cz = view.lastTickPosZ + (view.posZ - view.lastTickPosZ) * partial;
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(-ox, -oy, -oz);
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.translate(-cx, -cy, -cz);
         GlStateManager.disableTexture2D();
         GlStateManager.disableLighting();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
         GlStateManager.disableCull();
         GlStateManager.enableDepth();
-        GlStateManager.depthFunc(515);
         GlStateManager.depthMask(false);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+        GL11.glLineWidth(2.0F);
         try {
             draw(snap);
         } finally {
-            GL11.glDisable(GL11.GL_LINE_SMOOTH);
             GL11.glLineWidth(1.0F);
             GlStateManager.depthMask(true);
-            GlStateManager.enableDepth();
             GlStateManager.enableCull();
             GlStateManager.enableTexture2D();
-            GlStateManager.color(1F, 1F, 1F, 1F);
+            GlStateManager.enableLighting();
             GlStateManager.disableBlend();
+            GlStateManager.color(1F, 1F, 1F, 1F);
             GlStateManager.popMatrix();
         }
     }
 
     private void draw (PathSnapshot snap) {
         List<PathSnapshot.Node> nodes = snap.nodes;
-        int[] shown = waypoints(nodes);
-        int first = 0;
-        int target = -1;
-        for (int k = 0; k < shown.length; k++) {
-            int index = nodes.get(shown[k]).index;
-            if (index <= snap.cursor - 1) first = k;
-            if (target < 0 && index >= snap.cursor) target = index;
-        }
+        int cursor = snap.cursor;
+        Tessellator tess = Tessellator.getInstance();
+        WorldRenderer buffer = tess.getWorldRenderer();
 
-        if (first < shown.length) {
-            PathSnapshot.Node origin = nodes.get(shown[first]);
-            int shade = GL11.glGetInteger(GL11.GL_SHADE_MODEL);
-            GL11.glShadeModel(GL11.GL_SMOOTH);
-            GL11.glBegin(GL11.GL_QUADS);
-            for (int k = first; k < shown.length; k++) {
-                PathSnapshot.Node node = nodes.get(shown[k]);
-                float fade = fade(origin, node.x, node.y, node.z);
-                float alpha = (node.index == target ? Math.min(1F, FILL * 1.8F) : FILL) * fade;
-                GL11.glColor4f(RED, GREEN, BLUE, alpha);
-                double[] box = floorBox(node);
-                quads(box[0], box[1], box[2], box[3], box[4], box[5]);
-            }
-            GL11.glEnd();
-
-            GL11.glLineWidth(LINE_WIDTH);
-            GL11.glBegin(GL11.GL_LINES);
-            for (int k = first; k < shown.length; k++) {
-                PathSnapshot.Node node = nodes.get(shown[k]);
-                GL11.glColor4f(RED, GREEN, BLUE, fade(origin, node.x, node.y, node.z));
-                double[] box = floorBox(node);
-                edges(box[0], box[1], box[2], box[3], box[4], box[5]);
-            }
-            GL11.glEnd();
-
-            GL11.glBegin(GL11.GL_LINE_STRIP);
-            for (int k = first; k < shown.length; k++) {
-                PathSnapshot.Node node = nodes.get(shown[k]);
-                GL11.glColor4f(RED, GREEN, BLUE, fade(origin, node.x, node.y, node.z));
-                GL11.glVertex3d(node.x, node.y + LINE_LIFT, node.z);
-            }
-            GL11.glEnd();
-            GL11.glShadeModel(shade);
-
-            if (snap.goal != null) {
-                float fade = fade(origin, snap.goal[0], snap.goal[1], snap.goal[2]);
-                int x = (int) Math.floor(snap.goal[0]);
-                int y = (int) Math.floor(snap.goal[1]);
-                int z = (int) Math.floor(snap.goal[2]);
-                GL11.glColor4f(RED, GREEN, BLUE, FILL * 0.6F * fade);
-                GL11.glBegin(GL11.GL_QUADS);
-                quads(x, y, z, x + 1, y + 2, z + 1);
-                GL11.glEnd();
-                GL11.glColor4f(RED, GREEN, BLUE, fade);
-                GL11.glBegin(GL11.GL_LINES);
-                edges(x, y, z, x + 1, y + 2, z + 1);
-                GL11.glEnd();
-            }
-        } else if (snap.goal != null) {
-            int x = (int) Math.floor(snap.goal[0]);
-            int y = (int) Math.floor(snap.goal[1]);
-            int z = (int) Math.floor(snap.goal[2]);
-            GL11.glColor4f(RED, GREEN, BLUE, FILL * 0.6F);
-            GL11.glBegin(GL11.GL_QUADS);
-            quads(x, y, z, x + 1, y + 2, z + 1);
-            GL11.glEnd();
-            GL11.glColor4f(RED, GREEN, BLUE, 1F);
-            GL11.glBegin(GL11.GL_LINES);
-            edges(x, y, z, x + 1, y + 2, z + 1);
-            GL11.glEnd();
-        }
-    }
-
-    // Full strength next to the bot, easing out along the route.
-    private static float fade (PathSnapshot.Node origin, double x, double y, double z) {
-        double dx = x - origin.x;
-        double dy = y - origin.y;
-        double dz = z - origin.z;
-        double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (dist <= FADE_NEAR) return 1F;
-        if (dist >= FADE_FAR) return 0.08F;
-        float t = (float) ((dist - FADE_NEAR) / (FADE_FAR - FADE_NEAR));
-        t = t * t * (3F - 2F * t);
-        return 1F - 0.92F * t;
-    }
-
-    // Straight walk runs keep the first and last block. Jumps, drops and
-    // other non-walk nodes stay. This is only which boxes get drawn.
-    private static int[] waypoints (List<PathSnapshot.Node> nodes) {
-        int n = nodes.size();
-        if (n == 0) return new int[0];
-        int[] out = new int[n];
-        int count = 0;
-        out[count++] = 0;
-        int i = 0;
-        while (i < n - 1) {
-            int next = i + 1;
-            if (!special(nodes.get(next))) {
-                for (int j = i + 2; j < n; j++) {
-                    if (special(nodes.get(j))) break;
-                    if (!onLine(nodes.get(i), nodes.get(i + 1), nodes.get(j))) break;
-                    next = j;
+        if (nodes.size() >= 2) {
+            List<Vert> line = new ArrayList<Vert>();
+            for (int i = 0; i < nodes.size() - 1; i++) {
+                PathSnapshot.Node a = nodes.get(i);
+                PathSnapshot.Node b = nodes.get(i + 1);
+                int[] color = colorFor(b.kind);
+                int alpha = segmentAlpha(i, cursor);
+                if (i == 0) line.add(new Vert(a.x, a.y + LIFT, a.z, colorFor(a.kind), alpha));
+                if (arcs(b.kind, a, b)) {
+                    int steps = 8;
+                    double lift = b.kind.equals("drop") ? 0.12 : Math.min(1.15, 0.18 * Math.hypot(b.x - a.x, b.z - a.z));
+                    for (int s = 1; s <= steps; s++) {
+                        double t = s / (double) steps;
+                        double h = 4 * t * (1 - t);
+                        line.add(new Vert(
+                            a.x + (b.x - a.x) * t,
+                            a.y + (b.y - a.y) * t + lift * h + LIFT,
+                            a.z + (b.z - a.z) * t,
+                            color,
+                            alpha
+                        ));
+                    }
+                } else {
+                    line.add(new Vert(b.x, b.y + LIFT, b.z, color, alpha));
                 }
             }
-            out[count++] = next;
-            i = next;
+            buffer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+            for (Vert v : line) buffer.pos(v.x, v.y, v.z).color(v.r, v.g, v.b, v.a).endVertex();
+            tess.draw();
         }
-        int[] shown = new int[count];
-        System.arraycopy(out, 0, shown, 0, count);
-        return shown;
+
+        for (PathSnapshot.Node node : nodes) {
+            int[] color = colorFor(node.kind);
+            boolean current = node.index == cursor;
+            int alpha = node.index < cursor ? 70 : (current ? 230 : 160);
+            if (current) color = new int[] { 255, 255, 255 };
+            float size = current ? 0.28F : (node.anchor ? 0.20F : 0.14F);
+            diamond(buffer, node.x, node.y + 0.03, node.z, size, color, alpha);
+            tess.draw();
+            if (node.anchor || current) {
+                float height = current ? 1.15F : 0.7F;
+                buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+                buffer.pos(node.x, node.y + 0.03, node.z).color(color[0], color[1], color[2], alpha).endVertex();
+                buffer.pos(node.x, node.y + height, node.z).color(color[0], color[1], color[2], 40).endVertex();
+                tess.draw();
+            }
+        }
+
+        if (snap.goal != null) {
+            column(buffer, snap.goal[0], snap.goal[1], snap.goal[2], 0.22, 1.7, new int[] { 80, 230, 120 }, 200);
+            tess.draw();
+        }
+
+        if (snap.bot != null && snap.active) {
+            ring(buffer, snap.bot[0], snap.bot[1] + 0.04, snap.bot[2], 0.35, new int[] { 255, 255, 255 }, 180);
+            tess.draw();
+            PathSnapshot.Node aim = aimNode(nodes, cursor);
+            if (aim != null) {
+                buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+                buffer.pos(snap.bot[0], snap.bot[1] + 0.08, snap.bot[2]).color(255, 255, 255, 120).endVertex();
+                buffer.pos(aim.x, aim.y + LIFT, aim.z).color(255, 255, 255, 40).endVertex();
+                tess.draw();
+            }
+        }
     }
 
-    private static boolean special (PathSnapshot.Node node) {
-        if (node.anchor) return true;
-        return node.kind != null && !node.kind.equals("walk") && !node.kind.equals("start");
+    private static PathSnapshot.Node aimNode (List<PathSnapshot.Node> nodes, int cursor) {
+        if (nodes.isEmpty()) return null;
+        for (PathSnapshot.Node node : nodes) {
+            if (node.index == cursor) return node;
+        }
+        return cursor >= nodes.size() ? nodes.get(nodes.size() - 1) : nodes.get(0);
     }
 
-    private static boolean onLine (PathSnapshot.Node a, PathSnapshot.Node b, PathSnapshot.Node c) {
-        double ax = b.x - a.x;
-        double ay = b.y - a.y;
-        double az = b.z - a.z;
-        double bx = c.x - a.x;
-        double by = c.y - a.y;
-        double bz = c.z - a.z;
-        double cx = ay * bz - az * by;
-        double cy = az * bx - ax * bz;
-        double cz = ax * by - ay * bx;
-        if (cx * cx + cy * cy + cz * cz > 1.0E-4) return false;
-        return ax * bx + ay * by + az * bz > 0;
+    private static int segmentAlpha (int index, int cursor) {
+        if (index + 1 < cursor) return 55;
+        if (index + 1 == cursor) return 230;
+        return 170;
     }
 
-    // Floor highlight: the block under the feet, or just the slab when the
-    // standing height is not a whole block.
-    private static double[] floorBox (PathSnapshot.Node node) {
-        int x = (int) Math.floor(node.x);
-        int z = (int) Math.floor(node.z);
-        int y = (int) Math.floor(node.y);
-        double slab = node.y - y;
-        double bottom = slab > 0.01 ? y : y - 1;
-        return new double[] {
-            x - PAD, bottom - PAD, z - PAD,
-            x + 1 + PAD, node.y + PAD, z + 1 + PAD
+    private static boolean arcs (String kind, PathSnapshot.Node a, PathSnapshot.Node b) {
+        if (kind.equals("gap") || kind.equals("jumpUp") || kind.equals("drop")) return true;
+        return Math.abs(b.y - a.y) > 0.75;
+    }
+
+    private static void diamond (WorldRenderer buffer, double x, double y, double z, float size, int[] color, int alpha) {
+        buffer.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
+        buffer.pos(x, y, z).color(color[0], color[1], color[2], alpha).endVertex();
+        buffer.pos(x + size, y, z).color(color[0], color[1], color[2], alpha).endVertex();
+        buffer.pos(x, y, z + size).color(color[0], color[1], color[2], alpha).endVertex();
+        buffer.pos(x - size, y, z).color(color[0], color[1], color[2], alpha).endVertex();
+        buffer.pos(x, y, z - size).color(color[0], color[1], color[2], alpha).endVertex();
+        buffer.pos(x + size, y, z).color(color[0], color[1], color[2], alpha).endVertex();
+    }
+
+    private static void column (WorldRenderer buffer, double x, double y, double z, double half, double height, int[] color, int alpha) {
+        buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+        double[][] corners = {
+            { x - half, z - half },
+            { x + half, z - half },
+            { x + half, z + half },
+            { x - half, z + half }
         };
+        for (int i = 0; i < 4; i++) {
+            double[] a = corners[i];
+            double[] b = corners[(i + 1) % 4];
+            line(buffer, a[0], y, a[1], b[0], y, b[1], color, alpha);
+            line(buffer, a[0], y + height, a[1], b[0], y + height, b[1], color, alpha);
+            line(buffer, a[0], y, a[1], a[0], y + height, a[1], color, alpha);
+        }
     }
 
-    private static void quads (double x0, double y0, double z0, double x1, double y1, double z1) {
-        GL11.glVertex3d(x0, y0, z0);
-        GL11.glVertex3d(x1, y0, z0);
-        GL11.glVertex3d(x1, y0, z1);
-        GL11.glVertex3d(x0, y0, z1);
-
-        GL11.glVertex3d(x0, y1, z0);
-        GL11.glVertex3d(x0, y1, z1);
-        GL11.glVertex3d(x1, y1, z1);
-        GL11.glVertex3d(x1, y1, z0);
-
-        GL11.glVertex3d(x0, y0, z0);
-        GL11.glVertex3d(x0, y1, z0);
-        GL11.glVertex3d(x1, y1, z0);
-        GL11.glVertex3d(x1, y0, z0);
-
-        GL11.glVertex3d(x0, y0, z1);
-        GL11.glVertex3d(x1, y0, z1);
-        GL11.glVertex3d(x1, y1, z1);
-        GL11.glVertex3d(x0, y1, z1);
-
-        GL11.glVertex3d(x0, y0, z0);
-        GL11.glVertex3d(x0, y0, z1);
-        GL11.glVertex3d(x0, y1, z1);
-        GL11.glVertex3d(x0, y1, z0);
-
-        GL11.glVertex3d(x1, y0, z0);
-        GL11.glVertex3d(x1, y1, z0);
-        GL11.glVertex3d(x1, y1, z1);
-        GL11.glVertex3d(x1, y0, z1);
+    private static void ring (WorldRenderer buffer, double x, double y, double z, double radius, int[] color, int alpha) {
+        buffer.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION_COLOR);
+        int steps = 16;
+        for (int i = 0; i < steps; i++) {
+            double a = i * Math.PI * 2 / steps;
+            buffer.pos(x + Math.cos(a) * radius, y, z + Math.sin(a) * radius).color(color[0], color[1], color[2], alpha).endVertex();
+        }
     }
 
-    private static void edges (double x0, double y0, double z0, double x1, double y1, double z1) {
-        line(x0, y0, z0, x1, y0, z0);
-        line(x1, y0, z0, x1, y0, z1);
-        line(x1, y0, z1, x0, y0, z1);
-        line(x0, y0, z1, x0, y0, z0);
-        line(x0, y1, z0, x1, y1, z0);
-        line(x1, y1, z0, x1, y1, z1);
-        line(x1, y1, z1, x0, y1, z1);
-        line(x0, y1, z1, x0, y1, z0);
-        line(x0, y0, z0, x0, y1, z0);
-        line(x1, y0, z0, x1, y1, z0);
-        line(x1, y0, z1, x1, y1, z1);
-        line(x0, y0, z1, x0, y1, z1);
+    private static void line (WorldRenderer buffer, double x0, double y0, double z0, double x1, double y1, double z1, int[] color, int alpha) {
+        buffer.pos(x0, y0, z0).color(color[0], color[1], color[2], alpha).endVertex();
+        buffer.pos(x1, y1, z1).color(color[0], color[1], color[2], alpha).endVertex();
     }
 
-    private static void line (double x0, double y0, double z0, double x1, double y1, double z1) {
-        GL11.glVertex3d(x0, y0, z0);
-        GL11.glVertex3d(x1, y1, z1);
+    private static int[] colorFor (String kind) {
+        if (kind == null) return new int[] { 180, 180, 180 };
+        if (kind.equals("gap")) return new int[] { 255, 196, 64 };
+        if (kind.equals("jumpUp")) return new int[] { 255, 140, 48 };
+        if (kind.equals("drop")) return new int[] { 120, 170, 255 };
+        if (kind.equals("ladderEnter") || kind.equals("climb") || kind.equals("climbDown") || kind.equals("ladderExit")) {
+            return new int[] { 80, 220, 130 };
+        }
+        if (kind.equals("swim") || kind.equals("swimExit")) return new int[] { 60, 150, 255 };
+        if (kind.equals("step")) return new int[] { 150, 220, 255 };
+        return new int[] { 90, 210, 255 };
+    }
+
+    private static final class Vert {
+        final double x;
+        final double y;
+        final double z;
+        final int r;
+        final int g;
+        final int b;
+        final int a;
+
+        Vert (double x, double y, double z, int[] color, int alpha) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.r = color[0];
+            this.g = color[1];
+            this.b = color[2];
+            this.a = alpha;
+        }
     }
 }

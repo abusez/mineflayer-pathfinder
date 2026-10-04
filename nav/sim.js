@@ -85,45 +85,14 @@ function createSim (bot, { world } = {}) {
   // One client tick, in place, through the same stepPlayer the live client
   // runs. input holds keys (input.sprint is the sprint KEY; whether the
   // player sprints is the vanilla state in s.living).
-  // sample, when set, sees every simulated pose (pathfinding sets it).
-  const api = {
-    physics,
-    world: physicsWorld,
-    abilities,
-    fromBot,
-    clone,
-    step,
-    sample: null
-  }
-
   function step (s, input, yawDeg, pitchDeg) {
     if (yawDeg != null) s.yawDegrees = f32(yawDeg)
     if (pitchDeg != null) s.pitchDegrees = f32(pitchDeg)
     stepPlayer(physics, physicsWorld, s, input, { food: bot.food })
-    if (api.sample) api.sample(s)
     return s
   }
 
-  api.step = step
-  return api
+  return { physics, world: physicsWorld, abilities, fromBot, clone, step }
 }
 
-function poseOf (s) {
-  return {
-    x: round3(s.pos.x),
-    y: round3(s.pos.y),
-    z: round3(s.pos.z),
-    yaw: round3(s.yawDegrees),
-    pitch: round3(s.pitchDegrees),
-    sneak: !!(s.living && s.living.sneak),
-    sprint: !!(s.living && s.living.sprinting),
-    vx: round3(s.motion.x),
-    vz: round3(s.motion.z)
-  }
-}
-
-function round3 (value) {
-  return Math.round(Number(value) * 1000) / 1000
-}
-
-module.exports = { createSim, poseOf }
+module.exports = { createSim }

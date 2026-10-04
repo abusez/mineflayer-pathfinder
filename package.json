@@ -1,43 +1,14 @@
 {
-  "name": "mineflayer-nav",
-  "version": "0.1.0",
-  "description": "Physics-driven parkour pathfinding for mineflayer on Minecraft 1.8.9: exact 1.8.9 hitboxes, momentum-aware jumps, vanilla client physics and humanlike rotation.",
-  "license": "MIT",
+  "name": "mineflayer-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Join a Minecraft server with a Microsoft refresh token or Minecraft access token",
   "main": "index.js",
-  "bin": {
-    "mineflayer-nav": "bin/cli.js"
-  },
-  "files": [
-    "index.js",
-    "lib/",
-    "nav/",
-    "bin/",
-    "auth.js",
-    "commands.js",
-    "log.js",
-    "scripts/patch-physics.js",
-    ".env.example",
-    "README.md",
-    "LICENSE"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/abusez/mineflayer-pathfinder.git"
-  },
-  "homepage": "https://github.com/abusez/mineflayer-pathfinder#readme",
-  "keywords": [
-    "mineflayer",
-    "minecraft",
-    "pathfinding",
-    "parkour",
-    "1.8.9",
-    "bot"
-  ],
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "start": "node bin/cli.js",
+    "start": "node index.js",
     "test": "node --test \"test/**/*.test.js\"",
     "simulate": "node scripts/simulate.js",
     "postinstall": "node scripts/patch-physics.js"

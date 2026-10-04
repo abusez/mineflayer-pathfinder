@@ -20,16 +20,12 @@ class WorkerPool {
     this.size = size
     this.workers = []
     this.nextId = 1
-    this.simPose = null
     for (let i = 0; i < size; i++) {
       const worker = new Worker(path.join(__dirname, 'planWorker.js'), { workerData: { version } })
       const { port1, port2 } = new MessageChannel()
       worker.postMessage({ type: 'init', port: port2 }, [port2])
       worker.unref()
       port1.unref()
-      worker.on('message', (msg) => {
-        if (msg && msg.type === 'sim' && msg.pose) this.simPose = { ...msg.pose, at: Date.now() }
-      })
       this.workers.push({ worker, port: port1, busy: 0 })
     }
     this.rr = 0

@@ -133,29 +133,11 @@ final class PathClient {
                 obj.has("cursor") ? obj.get("cursor").getAsInt() : 0,
                 vec(obj.get("goal")),
                 vec(obj.get("bot")),
-                sim(obj.get("sim")),
                 nodes
             );
         } catch (Exception e) {
             return null;
         }
-    }
-
-    private static PathSnapshot.Sim sim (JsonElement element) {
-        if (element == null || element.isJsonNull() || !element.isJsonObject()) return null;
-        JsonObject obj = element.getAsJsonObject();
-        if (!obj.has("x") || !obj.has("y") || !obj.has("z")) return null;
-        return new PathSnapshot.Sim(
-            obj.get("x").getAsDouble(),
-            obj.get("y").getAsDouble(),
-            obj.get("z").getAsDouble(),
-            obj.has("yaw") ? obj.get("yaw").getAsDouble() : 0,
-            obj.has("pitch") ? obj.get("pitch").getAsDouble() : 0,
-            obj.has("sneak") && obj.get("sneak").getAsBoolean(),
-            obj.has("sprint") && obj.get("sprint").getAsBoolean(),
-            obj.has("vx") ? obj.get("vx").getAsDouble() : 0,
-            obj.has("vz") ? obj.get("vz").getAsDouble() : 0
-        );
     }
 
     private static double[] vec (JsonElement element) {

@@ -5,13 +5,13 @@
 // 1.8.9 neighbour-dependent collision boxes. They used to be hand edits inside
 // node_modules and were lost on reinstall. Each patch is skipped when its
 // marker is already present.
-//
-// Runs as the package's postinstall, and again from index.js when the library
-// is first required (newer npm versions skip install scripts that the user
-// has not approved).
 
 const fs = require('fs')
 const path = require('path')
+
+const file = path.join(path.dirname(require.resolve('prismarine-physics/package.json')), 'index.js')
+let source = fs.readFileSync(file, 'utf8')
+let changed = false
 
 const PATCHES = [
   {
@@ -62,36 +62,16 @@ const PATCHES = [
   }
 ]
 
-// Applies every missing patch. Returns { applied: [names], failed: [names] }.
-function applyPatches ({ log = console.log } = {}) {
-  const file = path.join(path.dirname(require.resolve('prismarine-physics/package.json')), 'index.js')
-  let source = fs.readFileSync(file, 'utf8')
-  const applied = []
-  const failed = []
-  for (const patch of PATCHES) {
-    if (source.includes(patch.marker)) continue
-    if (!source.includes(patch.find)) {
-      failed.push(patch.name)
-      log(`patch-physics: could not apply "${patch.name}" (source changed upstream)`)
-      continue
-    }
-    source = source.replace(patch.find, patch.replace)
-    applied.push(patch.name)
-    log(`patch-physics: applied "${patch.name}"`)
+for (const patch of PATCHES) {
+  if (source.includes(patch.marker)) continue
+  if (!source.includes(patch.find)) {
+    console.error(`patch-physics: could not apply "${patch.name}" (source changed upstream)`)
+    process.exitCode = 1
+    continue
   }
-  if (applied.length) fs.writeFileSync(file, source)
-  return { applied, failed }
+  source = source.replace(patch.find, patch.replace)
+  changed = true
+  console.log(`patch-physics: applied "${patch.name}"`)
 }
 
-// True when every patch is already in place (no file writes).
-function isPatched () {
-  const file = path.join(path.dirname(require.resolve('prismarine-physics/package.json')), 'index.js')
-  const source = fs.readFileSync(file, 'utf8')
-  return PATCHES.every(patch => source.includes(patch.marker))
-}
-
-module.exports = { applyPatches, isPatched }
-
-if (require.main === module) {
-  if (applyPatches().failed.length) process.exitCode = 1
-}
+if (changed) fs.writeFileSync(file, source)

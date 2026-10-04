@@ -3,7 +3,7 @@
 const { Terrain } = require('./blocks')
 const { ColumnCache, NavWorld } = require('./world')
 const { RemotePlanner, RemoteSearch } = require('./workers/remote')
-const { createSim, poseOf } = require('./sim')
+const { createSim } = require('./sim')
 const { Primitives } = require('./primitives')
 const { Planner } = require('./planner')
 const { Route } = require('./route')
@@ -35,9 +35,6 @@ function createNav (bot, options = {}) {
     // Live planning budget per tick. The whole client tick (planning +
     // controller) must stay well under 50 ms or the Timer drops ticks.
     msPerTick: 8,
-    // While a finished route is being followed, periodically search again and
-    // switch if a clearly cheaper route shows up.
-    recalc: true,
     ...options
   }
   const columns = new ColumnCache(bot)
@@ -50,9 +47,7 @@ function createNav (bot, options = {}) {
   // movement tick only polls for results. Deterministic mode (tests) always
   // plans on this thread.
   const remote = opts.pool && !opts.deterministic ? new RemotePlanner(bot, terrain, planner, opts.pool) : null
-  const newSearch = (g, o = {}) => remote
-    ? new RemoteSearch(remote, g, { ...o, acceptStale: !allowRecalc })
-    : planner.search(g, o)
+  const newSearch = (g, o) => remote ? new RemoteSearch(remote, g, o) : planner.search(g, o)
   const smoother = new Smoother(bot, terrain, sim, primitives)
   const rotation = new Rotation(Number(bot.entity.yawDegrees), Number(bot.entity.pitchDegrees))
   const controller = new Controller(bot, sim, terrain, rotation)
@@ -62,7 +57,6 @@ function createNav (bot, options = {}) {
   let route = null
   let search = null
   let betterSearch = null
-  let allowRecalc = opts.recalc !== false
   let pending = null
   let waitUntil = 0
   let tick = 0
@@ -88,14 +82,6 @@ function createNav (bot, options = {}) {
     get goal () { return goal },
     get route () { return route },
     get active () { return goal != null },
-    get recalc () { return allowRecalc },
-    setRecalc (on) {
-      allowRecalc = !!on
-      if (!allowRecalc) {
-        betterSearch = null
-        if (search) search.acceptStale = true
-      }
-    },
     // The state the controller sees this tick (with last tick's sprint).
     snapshot () { return sim.fromBot() },
     get lastStatus () { return lastStatus },
@@ -177,28 +163,14 @@ function createNav (bot, options = {}) {
     runSearch()
   }
 
-  // Keep the latest simulated player from a local search. Workers publish
-  // their own pose; this only sees steps on this thread.
-  function sampleSearch (fn) {
-    let pending = null
-    const prev = sim.sample
-    sim.sample = (s) => { pending = s }
-    try {
-      return fn()
-    } finally {
-      sim.sample = prev
-      if (pending) nav.simPose = { at: Date.now(), ...poseOf(pending) }
-    }
-  }
-
   function runSearch () {
     if (!search) return
     const t0 = performance.now()
     let result = search.done
     if (opts.deterministic) {
-      if (!result) result = sampleSearch(() => search.step(opts.expansionsPerTick))
+      if (!result) result = search.step(opts.expansionsPerTick)
     } else {
-      result = sampleSearch(() => search.step(Infinity, performance.now() + opts.msPerTick))
+      result = search.step(Infinity, performance.now() + opts.msPerTick)
     }
     searchCpu += performance.now() - t0
     if (search && search.discarded > staleLogged && performance.now() - staleLogAt > 1000) {
@@ -415,11 +387,7 @@ function createNav (bot, options = {}) {
       if (!goal) return
 
       if (betterSearch) {
-        const r = opts.deterministic
-          ? sampleSearch(() => betterSearch.step(300))
-          : remote
-            ? betterSearch.step()
-            : sampleSearch(() => betterSearch.step(Infinity, performance.now() + 3))
+        const r = opts.deterministic ? betterSearch.step(300) : remote ? betterSearch.step() : betterSearch.step(Infinity, performance.now() + 3)
         if (r) {
           const elapsed = r.workerMs != null ? r.workerMs : performance.now() - betterT0
           const s = betterSearch
@@ -477,7 +445,7 @@ function createNav (bot, options = {}) {
       }
       apply(out.input, out.look)
       recovery.predicted = out.predicted
-      if (allowRecalc && !search && !betterSearch && route.status === 'found' && recovery.wantsBetterRouteCheck(tick)) {
+      if (!search && !betterSearch && route.status === 'found' && recovery.wantsBetterRouteCheck(tick)) {
         betterSearch = newSearch(goal, { maxNodes: 20000 })
         betterT0 = performance.now()
       }

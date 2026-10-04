@@ -7,6 +7,7 @@ const { WorkerPool } = require('./nav/workers/pool')
 const { installGrimTrace } = require('./nav/grimTrace')
 const { createRecorder, stats } = require('./nav/recorder')
 const { createNetTrace } = require('./nav/netTrace')
+const { startDebugServer } = require('./nav/debugServer')
 const fs = require('fs')
 const path = require('path')
 const { line: logLine, paint } = require('./log')
@@ -31,11 +32,7 @@ const STALL_PROBE = 0.08
 const CLIMB_STUCK_TICKS = 25
 const MAX_COORD = 30000000
 
-// Interactive terminal console for a bot: goto, jumps, hitbox, record, ...
-// options.recordingsDir: where record/scene files go (default ./recordings
-// in the working directory).
-function attachCommands (bot, options = {}) {
-  const recordingsDir = options.recordingsDir || path.join(process.cwd(), 'recordings')
+function attachCommands (bot) {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -117,21 +114,6 @@ function attachCommands (bot, options = {}) {
 
     if (name === 'jump') {
       enqueue(() => pulseControl('jump'))
-      return
-    }
-
-    if (name === 'recalc') {
-      if (!bot.nav) {
-        print(logLine('warn', 'navigation is not ready yet'))
-        return
-      }
-      const state = parseToggle(parts[1], bot.nav.recalc)
-      if (state == null) {
-        print('Usage: recalc on|off')
-        return
-      }
-      bot.nav.setRecalc(state)
-      print(logLine('info', state ? 'recalculation on' : 'recalculation off'))
       return
     }
 
@@ -246,7 +228,7 @@ function attachCommands (bot, options = {}) {
           print('Not recording.')
           return
         }
-        const dir = recordingsDir
+        const dir = path.join(__dirname, 'recordings')
         fs.mkdirSync(dir, { recursive: true })
         const file = path.join(dir, `${(parts[2] || 'rec-' + Date.now()).replace(/[^\w.-]/g, '_')}.json`)
         const rec = recorder.save(file)
@@ -476,7 +458,7 @@ function attachCommands (bot, options = {}) {
       names,
       blocks
     }
-    const dir = path.join(recordingsDir, 'scenes')
+    const dir = path.join(__dirname, 'recordings', 'scenes')
     fs.mkdirSync(dir, { recursive: true })
     const file = path.join(dir, `${sceneName.replace(/[^\w.-]/g, '_')}.json`)
     fs.writeFileSync(file, JSON.stringify(scene))
@@ -512,6 +494,7 @@ function attachCommands (bot, options = {}) {
     }
     installGrimTrace(bot, print)
     netTrace = createNetTrace(bot)
+    startDebugServer(bot, { log: (msg) => print(logLine('info', msg)) })
     bot.on('nav:stage', (ev) => {
       const text = formatStage(ev)
       if (text) print(text)
@@ -603,7 +586,6 @@ function helpText () {
     'Commands:',
     '  move <forward|back|left|right> <blocks>',
     '  goto <x> <y> <z>',
-    '  recalc [on|off]   (look for a better route while already walking)',
     '  jump',
     '  stop',
     '  sneak [on|off]',
