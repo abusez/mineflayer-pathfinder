@@ -3,6 +3,7 @@
 const net = require('net')
 
 const DEFAULT_PORT = 28765
+const SIM_HOLD_MS = 500
 
 function round (value) {
   return Math.round(Number(value) * 1000) / 1000
@@ -51,7 +52,31 @@ function buildSnapshot (bot) {
     cursor: nav && nav.controller ? nav.controller.cursor : 0,
     goal: goalPoint,
     bot: feet ? point(feet.x, feet.y, feet.z) : null,
+    sim: simGhost(nav),
     nodes
+  }
+}
+
+// The player the pathfinder is simulating right now, if a search stepped one recently.
+function simGhost (nav) {
+  if (!nav) return null
+  const now = Date.now()
+  const remote = nav.remote && nav.remote.pool && nav.remote.pool.simPose
+  const local = nav.simPose
+  let pose = null
+  if (local && now - local.at <= SIM_HOLD_MS) pose = local
+  if (remote && now - remote.at <= SIM_HOLD_MS && (!pose || remote.at > pose.at)) pose = remote
+  if (!pose) return null
+  return {
+    x: pose.x,
+    y: pose.y,
+    z: pose.z,
+    yaw: pose.yaw,
+    pitch: pose.pitch,
+    sneak: !!pose.sneak,
+    sprint: !!pose.sprint,
+    vx: pose.vx || 0,
+    vz: pose.vz || 0
   }
 }
 
@@ -100,13 +125,13 @@ function startDebugServer (bot, { port = DEFAULT_PORT, log = () => {} } = {}) {
     log(`path view listening on 127.0.0.1:${addr.port}`)
   })
 
-  const timer = setInterval(publish, 100)
+  const timer = setInterval(publish, 50)
   if (timer.unref) timer.unref()
   bot.on('nav:route', publish)
   bot.on('end', () => {
     stopped = true
     clearInterval(timer)
-    broadcast(JSON.stringify({ v: 1, type: 'path', active: false, status: 'idle', cursor: 0, goal: null, bot: null, nodes: [] }))
+    broadcast(JSON.stringify({ v: 1, type: 'path', active: false, status: 'idle', cursor: 0, goal: null, bot: null, sim: null, nodes: [] }))
     server.close()
     for (const socket of clients) {
       try { socket.end() } catch {}

@@ -11,7 +11,7 @@ const { parentPort, workerData } = require('worker_threads')
 const { Vec3 } = require('vec3')
 const mcData = require('minecraft-data')(workerData.version || '1.8.9')
 const { Terrain } = require('../blocks')
-const { createSim } = require('../sim')
+const { createSim, poseOf } = require('../sim')
 const { Primitives } = require('../primitives')
 const { Planner } = require('../planner')
 const { ColumnCache, NavWorld } = require('../world')
@@ -99,7 +99,22 @@ parentPort.on('message', (msg) => {
     const planner = stack.planner
     planner.penalties = new Map(msg.penalties)
     const t0 = performance.now()
-    const result = planner.plan(msg.goal, { maxNodes: msg.maxNodes })
+    let pending = null
+    let lastPose = 0
+    planner.sim.sample = (s) => {
+      pending = s
+      const now = performance.now()
+      if (now - lastPose < 40) return
+      lastPose = now
+      parentPort.postMessage({ type: 'sim', pose: poseOf(s) })
+    }
+    let result
+    try {
+      result = planner.plan(msg.goal, { maxNodes: msg.maxNodes })
+    } finally {
+      planner.sim.sample = null
+      if (pending) parentPort.postMessage({ type: 'sim', pose: poseOf(pending) })
+    }
     reply.postMessage({ id: msg.id, mirror: msg.mirror, epoch: msg.epoch, ms: performance.now() - t0, result })
   }
 })

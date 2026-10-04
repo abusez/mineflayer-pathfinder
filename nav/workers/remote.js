@@ -73,12 +73,14 @@ class RemotePlanner {
   }
 
   // The finished result for a request: { status, path, ... }, 'stale' if the
-  // world changed meanwhile, or null while still running.
-  take (req) {
+  // world changed meanwhile, or null while still running. acceptStale keeps
+  // the finished path anyway, so a search is not started over.
+  take (req, { acceptStale = false } = {}) {
     const msg = this.results.get(req.id)
     if (!msg) return null
     this.results.delete(req.id)
-    if (msg.mirror !== this.mirror.id || msg.epoch !== req.epoch || msg.epoch !== this.mirror.epoch || !msg.result) {
+    const changed = msg.mirror !== this.mirror.id || msg.epoch !== req.epoch || msg.epoch !== this.mirror.epoch
+    if (!msg.result || (changed && !acceptStale)) {
       this.stats.stale++
       return 'stale'
     }
@@ -102,6 +104,7 @@ class RemoteSearch {
     this.done = null
     this.start = { g: 0 }
     this.discarded = 0
+    this.acceptStale = !!opts.acceptStale
   }
 
   step () {
@@ -110,7 +113,7 @@ class RemoteSearch {
       this.req = this.remote.request(this.goal, this.opts)
       return null
     }
-    const r = this.remote.take(this.req)
+    const r = this.remote.take(this.req, { acceptStale: this.acceptStale })
     if (r === null) return null
     if (r === 'stale') {
       this.discarded++
